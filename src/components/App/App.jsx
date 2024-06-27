@@ -1,104 +1,32 @@
-import { useState, useRef, useEffect } from 'react';
-import css from './App.module.css';
+import './App.module.css';
+import { Routes, Route } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import Navigation from '../Navigation/Navigation';
 
-import getImages from '../unsplash-api';
-import ImageGallery from '../ImageGallery/ImageGallery';
-import ImageModal from '../ImageModal/ImageModal';
-import Loader from '../Loader/Loader';
-import LoadMoreBtn from '../LoadMoreBtn/LoadMoreBtn';
-import SearchBar from '../SearchBar/SearchBar';
-import ErrorMessage from '../ErrorMessage/ErrorMessage';
+const HomePage = lazy(() => import('../../pages/HomePage/HomePage'));
+const MoviesPage = lazy(() => import('../../pages/MoviesPage/MoviesPage'));
+const MovieDetailsPage = lazy(() => import('../../pages/MovieDetailsPage/MovieDetailsPage'));
+const MovieCast = lazy(() => import('../MovieCast/MovieCast'));
+const MovieReviews = lazy(() => import('../MovieReviews/MovieReviews'));
+// import NotFoundPage from '../../pages/NotFoundPage/NotFoundPage';
 
-const modalInitialParams = {
-  isOpen: false,
-  url: '',
-  description: '',
-};
-
-export default function App() {
-    const [searchImage, setSearchImage] = useState('');
-    const [images, setImages] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [isError, setIsError] = useState(false);
-    const [page, setPage] = useState(1);
-    const [showLoadMoreBtn, setShowLoadMoreBtn] = useState(false);
-    const [modalParams, setModalParams] = useState(modalInitialParams);
-
-    const appRef = useRef();
-
-    useEffect(() => {
-        if (searchImage === '') {
-            return;
-        }
-    
-        async function getData() {
-            try {
-                setIsLoading(true);
-                setIsError(false);
-                const { results, total_pages } = await getImages(searchImage, page);
-                setImages(prevImages => {
-                return [...prevImages, ...results];
-                });
-                setShowLoadMoreBtn(total_pages && total_pages !== page);
-            } catch (error) {
-                setIsError(true);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-
-        getData();
-    }, [searchImage, page]
-    );
-          
-    const handleSearch = newImage => {
-        setSearchImage(newImage);
-        setPage(1);
-        setImages([]);
-    };
-    
-    const handleLoadMoreClick = () => {
-        setPage(page + 1);
-    };
-
-    const handleImageClick = (url, description) => {
-        setModalParams({ isOpen: true, url, description });
-    };
-
-    const handleModalClose = () => {
-        setModalParams(modalInitialParams);
-  };
-
-    useEffect(() => {
-        if (page === 1) return;
-
-    appRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }, [images, page]);
-
+const App = () => {
     return (
-        <div ref={appRef}>
-            <h1 className={css.title}>Search Image Service</h1>
-            <SearchBar onSearch={handleSearch} />
-
-            {isError && <ErrorMessage />}
-            
-            {images.length > 0 && (
-                <ImageGallery cards={images} onImageClick={handleImageClick} />
-            )}
-
-            {images.length > 0 && !isLoading && showLoadMoreBtn && (
-                <LoadMoreBtn onClick={handleLoadMoreClick} />
-            )}
-            
-            {isLoading && <Loader />}
-                {modalParams && (
-                    <ImageModal
-                        url={modalParams.url}
-                        description={modalParams.description}
-                        isOpen={modalParams.isOpen}
-                        onClose={handleModalClose}
-                    />
-                )}
+        <div>
+            <Navigation />
+            <Suspense fallback={null}>  
+                <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/movies" element={<MoviesPage />} />
+                    <Route path="/movies/:movieId" element={<MovieDetailsPage />}> 
+                        <Route path="cast" element={<MovieCast/>} />
+                        <Route path="reviews" element={<MovieReviews />} />
+                    </Route>
+                    {/* <Route path="*" element={<NotFoundPage />} />  */}
+                </Routes>
+            </Suspense>
         </div>
-    );
+  );
 }
+
+export default App;
