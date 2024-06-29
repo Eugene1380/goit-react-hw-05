@@ -9,10 +9,10 @@ const MoviesPage = () => {
     const query = params.get("query");
     const [movies, setMovies] = useState([]);
 
-const handleSearch = (event) => {
-    event.preventDefault();
-    setSearchParams({ query: inputValue });
-  };
+const handleSubmit = (value) => {
+        console.log("value>> ", value);
+        setParams({query: value})
+    }
 
     useEffect(() => {
         if (!query) { return }
