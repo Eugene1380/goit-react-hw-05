@@ -34,4 +34,3 @@ const handleSearch = (event) => {
 }
 
 export default MoviesPage
-
