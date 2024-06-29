@@ -27,9 +27,11 @@ const handleSearch = (event) => {
         }
         getData();
     }, [query]) 
-    return <div><SearchForm onSubmit={handleSubmit} />
-        <MovieList films={movies} />
+    return <div>
+        <SearchForm onSubmit={handleSubmit} />
+            {movies.length > 0 && <MovieList films={movies} />}
     </div>
 }
 
 export default MoviesPage
+
